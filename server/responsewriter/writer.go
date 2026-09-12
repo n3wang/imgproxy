@@ -190,6 +190,14 @@ func (w *Writer) setCacheControlPassthrough() bool {
 
 // setCSP sets the Content-Security-Policy header to prevent script execution.
 func (w *Writer) setCSP() {
+	if len(w.Header().Values(httpheaders.ContentSecurityPolicy)) > 0 {
+		return
+	}
+
+	if len(w.result.Values(httpheaders.ContentSecurityPolicy)) > 0 {
+		return
+	}
+
 	w.result.Set(httpheaders.ContentSecurityPolicy, ContentSecurityPolicy)
 }
 
