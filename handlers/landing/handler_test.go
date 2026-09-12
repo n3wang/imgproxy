@@ -29,5 +29,7 @@ func TestLandingHandler(t *testing.T) {
 	body := rr.Body.String()
 	assert.Contains(t, body, "imgproxy Playground")
 	assert.Contains(t, body, "URL Builder")
-	assert.Contains(t, body, "/{signature}/{processing_options}/plain/{source_url}@{ext}")
+	assert.Contains(t, body, "https://imgproxy.l.l0l.in")
+	assert.Contains(t, body, "local_files (local:///)")
+	assert.Contains(t, body, "Upload to Site C (author: imgproxy)")
 }

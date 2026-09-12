@@ -26,7 +26,7 @@
 			}
 
 			.container {
-				max-width: 1180px;
+				max-width: 1240px;
 				margin: 0 auto;
 				padding: 28px 16px 40px;
 			}
@@ -100,6 +100,12 @@
 
 			.grid {
 				display: grid;
+				grid-template-columns: minmax(280px, 430px) 1fr;
+				gap: 16px;
+			}
+
+			.grid-two {
+				display: grid;
 				grid-template-columns: minmax(280px, 420px) 1fr;
 				gap: 16px;
 			}
@@ -114,6 +120,10 @@
 			.card h3 {
 				margin-top: 0;
 				margin-bottom: 10px;
+			}
+
+			.card h4 {
+				margin: 12px 0 8px;
 			}
 
 			label {
@@ -135,7 +145,7 @@
 
 			.range-row {
 				display: grid;
-				grid-template-columns: 1fr 68px;
+				grid-template-columns: 1fr 78px;
 				gap: 10px;
 				align-items: center;
 			}
@@ -202,15 +212,25 @@
 				padding: 10px;
 			}
 
-			.docs ul {
-				margin: 8px 0 0;
-				padding-left: 20px;
+			.status {
+				font-size: 0.9rem;
+				line-height: 1.4;
+				margin-top: 10px;
+				padding: 10px;
+				border-radius: 10px;
+				border: 2px solid #d1b487;
+				background: #fff7e8;
 			}
 
-			.docs li { margin: 5px 0; }
+			.inline-row {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 10px;
+			}
 
 			@media (max-width: 900px) {
-				.grid { grid-template-columns: 1fr; }
+				.grid,
+				.grid-two { grid-template-columns: 1fr; }
 				header { flex-direction: column; align-items: flex-start; }
 			}
 		</style>
@@ -243,13 +263,22 @@
 					<div class="card">
 						<h3>URL Builder</h3>
 						<label for="endpoint">imgproxy base URL</label>
-						<input id="endpoint" value="http://imgproxy.example.com" aria-label="imgproxy base URL">
+						<input id="endpoint" value="https://imgproxy.l.l0l.in" aria-label="imgproxy base URL">
 
 						<label for="signature">Signature segment</label>
 						<input id="signature" value="unsafe" aria-label="signature">
 
+						<label for="sourceMode">Source mode</label>
+						<select id="sourceMode" aria-label="source mode">
+							<option value="remote">remote URL</option>
+							<option value="local">local_files (local:///)</option>
+						</select>
+
 						<label for="source">Source image URL</label>
-						<input id="source" value="https://images.unsplash.com/photo-1516117172878-fd2c41f4a759?auto=format&fit=crop&w=1600&q=80" aria-label="source URL">
+						<input id="source" value="https://c.l.l0l.in/proxy-image/WIN_20260604_08_19_52_Pro.jpg" aria-label="source URL">
+
+						<label for="localPath">Local file path (used in local_files mode)</label>
+						<input id="localPath" value="/logos/imgproxy.png" aria-label="local file path">
 
 						<label for="resizing">Resizing type</label>
 						<select id="resizing" aria-label="resizing type">
@@ -315,43 +344,155 @@
 							</div>
 						</div>
 
+						<div class="card">
+							<h3>Upload to Site C (author: imgproxy)</h3>
+							<form id="uploadForm">
+								<label for="uploadEndpoint">Upload endpoint</label>
+								<input id="uploadEndpoint" value="https://c.l.l0l.in/api/files/upload" aria-label="upload endpoint">
+								<label for="uploadFile">Choose file</label>
+								<input id="uploadFile" type="file" aria-label="upload file">
+								<div class="inline-row">
+									<div>
+										<label for="uploadFolder">Folder (optional)</label>
+										<input id="uploadFolder" placeholder="examples">
+									</div>
+									<div>
+										<label for="uploadName">Rename (optional)</label>
+										<input id="uploadName" placeholder="my-image.png">
+									</div>
+								</div>
+								<div class="actions" style="margin-top:10px;">
+									<button id="uploadBtn" type="submit">Upload</button>
+								</div>
+							</form>
+							<div id="uploadStatus" class="status">Upload a file and this page will switch source URL to the returned public_url.</div>
+						</div>
+
 						<div class="tip">
 							Use unsafe signature for quick testing. In production, replace unsafe with a signed path according to your signature key.
+							For local_files mode, configure IMGPROXY_LOCAL_FILESYSTEM_ROOT on the server and use paths like local:///logos/imgproxy.png.
 						</div>
 					</div>
 				</div>
 			</section>
 
-			<section id="resize" class="panel docs">
-				<h3>Resize Option</h3>
-				<p>Generated segment format:</p>
-				<div class="code">rs:{type}:{width}:{height}:{enlarge}</div>
-				<ul>
-					<li>type: fit, fill, crop, force, auto</li>
-					<li>width, height: positive integers</li>
-					<li>enlarge: 1 to allow upscaling, 0 to disable</li>
-				</ul>
+			<section id="resize" class="panel">
+				<div class="grid-two">
+					<div class="card">
+						<h3>Resize Demos</h3>
+						<p>Test the same source with alternate resize profiles.</p>
+						<label for="resizeType2">Resize type</label>
+						<select id="resizeType2">
+							<option value="fit">fit</option>
+							<option value="fill">fill</option>
+							<option value="crop">crop</option>
+						</select>
+						<label for="resizeW2">Width</label>
+						<div class="range-row">
+							<input id="resizeW2" type="range" min="100" max="1800" step="10" value="750">
+							<input id="resizeW2Val" value="750">
+						</div>
+						<label for="resizeH2">Height</label>
+						<div class="range-row">
+							<input id="resizeH2" type="range" min="100" max="1800" step="10" value="600">
+							<input id="resizeH2Val" value="600">
+						</div>
+						<label for="gravity2">Gravity</label>
+						<select id="gravity2">
+							<option value="ce">center</option>
+							<option value="sm">smart</option>
+							<option value="no">north</option>
+							<option value="so">south</option>
+						</select>
+					</div>
+					<div class="preview-area">
+						<div class="card">
+							<h3>Resize URL</h3>
+							<div id="resizeUrlOut" class="code">Preparing URL...</div>
+						</div>
+						<div class="card">
+							<h3>Resize Preview</h3>
+							<div class="preview-box">
+								<img id="resizePreview" alt="resize preview" loading="lazy">
+							</div>
+						</div>
+					</div>
+				</div>
 			</section>
 
-			<section id="formats" class="panel docs">
-				<h3>Output Format</h3>
-				<p>Append an output extension to force final encoding:</p>
-				<div class="code">.../plain/{source}@webp</div>
-				<ul>
-					<li>Common choices: jpg, png, webp, avif</li>
-					<li>Leave blank to keep source type when possible</li>
-				</ul>
+			<section id="formats" class="panel">
+				<div class="grid-two">
+					<div class="card">
+						<h3>Format Demos</h3>
+						<label for="formatExt2">Output extension</label>
+						<select id="formatExt2">
+							<option value="webp">webp</option>
+							<option value="jpg">jpg</option>
+							<option value="png">png</option>
+							<option value="avif">avif</option>
+						</select>
+						<label for="quality2">Quality</label>
+						<div class="range-row">
+							<input id="quality2" type="range" min="30" max="95" step="1" value="75">
+							<input id="quality2Val" value="75">
+						</div>
+						<label for="dpr2">DPR</label>
+						<select id="dpr2">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+					</div>
+					<div class="preview-area">
+						<div class="card">
+							<h3>Format URL</h3>
+							<div id="formatUrlOut" class="code">Preparing URL...</div>
+						</div>
+						<div class="card">
+							<h3>Format Preview</h3>
+							<div class="preview-box">
+								<img id="formatPreview" alt="format preview" loading="lazy">
+							</div>
+						</div>
+					</div>
+				</div>
 			</section>
 
-			<section id="advanced" class="panel docs">
-				<h3>Path Template Reference</h3>
-				<div class="code">/{signature}/{processing_options}/plain/{source_url}@{ext}</div>
-				<ul>
-					<li>signature: unsafe for testing, or a real signed value</li>
-					<li>processing_options: slash-separated option segments</li>
-					<li>source_url: full upstream image URL</li>
-					<li>ext: optional output extension</li>
-				</ul>
+			<section id="advanced" class="panel">
+				<div class="grid-two">
+					<div class="card">
+						<h3>Advanced Demos</h3>
+						<label for="rotate3">Rotate</label>
+						<select id="rotate3">
+							<option value="0">0</option>
+							<option value="90">90</option>
+							<option value="180">180</option>
+							<option value="270">270</option>
+						</select>
+						<label for="blur3">Blur</label>
+						<div class="range-row">
+							<input id="blur3" type="range" min="0" max="20" step="1" value="0">
+							<input id="blur3Val" value="0">
+						</div>
+						<label for="sharpen3">Sharpen</label>
+						<div class="range-row">
+							<input id="sharpen3" type="range" min="0" max="20" step="1" value="0">
+							<input id="sharpen3Val" value="0">
+						</div>
+					</div>
+					<div class="preview-area">
+						<div class="card">
+							<h3>Advanced URL</h3>
+							<div id="advancedUrlOut" class="code">Preparing URL...</div>
+						</div>
+						<div class="card">
+							<h3>Advanced Preview</h3>
+							<div class="preview-box">
+								<img id="advancedPreview" alt="advanced preview" loading="lazy">
+							</div>
+						</div>
+					</div>
+				</div>
 			</section>
 		</div>
 
@@ -361,7 +502,9 @@
 
 			const endpoint = document.getElementById('endpoint');
 			const signature = document.getElementById('signature');
+			const sourceMode = document.getElementById('sourceMode');
 			const source = document.getElementById('source');
+			const localPath = document.getElementById('localPath');
 			const resizing = document.getElementById('resizing');
 			const width = document.getElementById('width');
 			const height = document.getElementById('height');
@@ -373,69 +516,207 @@
 			const urlOut = document.getElementById('urlOut');
 			const preview = document.getElementById('preview');
 
+			const resizeType2 = document.getElementById('resizeType2');
+			const resizeW2 = document.getElementById('resizeW2');
+			const resizeH2 = document.getElementById('resizeH2');
+			const resizeW2Val = document.getElementById('resizeW2Val');
+			const resizeH2Val = document.getElementById('resizeH2Val');
+			const gravity2 = document.getElementById('gravity2');
+			const resizeUrlOut = document.getElementById('resizeUrlOut');
+			const resizePreview = document.getElementById('resizePreview');
+
+			const formatExt2 = document.getElementById('formatExt2');
+			const quality2 = document.getElementById('quality2');
+			const quality2Val = document.getElementById('quality2Val');
+			const dpr2 = document.getElementById('dpr2');
+			const formatUrlOut = document.getElementById('formatUrlOut');
+			const formatPreview = document.getElementById('formatPreview');
+
+			const rotate3 = document.getElementById('rotate3');
+			const blur3 = document.getElementById('blur3');
+			const blur3Val = document.getElementById('blur3Val');
+			const sharpen3 = document.getElementById('sharpen3');
+			const sharpen3Val = document.getElementById('sharpen3Val');
+			const advancedUrlOut = document.getElementById('advancedUrlOut');
+			const advancedPreview = document.getElementById('advancedPreview');
+
+			const uploadForm = document.getElementById('uploadForm');
+			const uploadEndpoint = document.getElementById('uploadEndpoint');
+			const uploadFile = document.getElementById('uploadFile');
+			const uploadFolder = document.getElementById('uploadFolder');
+			const uploadName = document.getElementById('uploadName');
+			const uploadStatus = document.getElementById('uploadStatus');
+
 			function cleanBaseURL(base) {
 				return (base || '').trim().replace(/\/+$/, '');
 			}
 
-			function syncRangeValues() {
-				widthValue.value = width.value;
-				heightValue.value = height.value;
+			function syncRangePair(rangeEl, textEl, maxValue) {
+				const value = parseInt(textEl.value, 10);
+				if (!Number.isNaN(value)) {
+					rangeEl.value = String(Math.max(1, Math.min(maxValue, value)));
+				}
+				textEl.value = rangeEl.value;
 			}
 
-			function syncSliderValues() {
-				const w = parseInt(widthValue.value, 10);
-				const h = parseInt(heightValue.value, 10);
-
-				if (!Number.isNaN(w)) {
-					width.value = String(Math.max(1, Math.min(5000, w)));
-				}
-				if (!Number.isNaN(h)) {
-					height.value = String(Math.max(1, Math.min(5000, h)));
-				}
-
-				syncRangeValues();
+			function remoteSourcePath(src) {
+				const parsed = new URL(src);
+				const baseSource = parsed.origin + parsed.pathname;
+				const query = parsed.search ? '%3F' + parsed.search.slice(1).replaceAll('&', '%26') : '';
+				const hash = parsed.hash ? '%23' + parsed.hash.slice(1) : '';
+				return baseSource + query + hash;
 			}
 
-			function buildURL() {
+			function localSourcePath(pathText) {
+				const raw = (pathText || '').trim();
+				if (!raw) {
+					throw new Error('Invalid local path');
+				}
+				const slashPath = raw.startsWith('/') ? raw : '/' + raw;
+				return 'local://' + slashPath;
+			}
+
+			function buildSourcePath() {
+				if (sourceMode.value === 'local') {
+					return localSourcePath(localPath.value);
+				}
+				return remoteSourcePath((source.value || '').trim());
+			}
+
+			function buildImgproxyURL(optionsList, extensionOverride) {
 				const base = cleanBaseURL(endpoint.value || window.location.origin);
 				const sig = (signature.value || 'unsafe').trim();
-				const src = (source.value || '').trim();
-				const rs = 'rs:' + resizing.value + ':' + width.value + ':' + height.value + ':' + enlarge.value;
-				const gr = 'g:' + gravity.value;
-				const sourcePath = encodeURI(src).replaceAll('@', '%40');
-				const suffix = ext.value ? '@' + ext.value : '';
-
-				if (!src) {
-					return 'Please enter a source image URL';
-				}
-
-				return base + '/' + sig + '/' + rs + '/' + gr + '/plain/' + sourcePath + suffix;
+				const srcPath = buildSourcePath();
+				const options = optionsList.filter(Boolean).join('/');
+				const extPart = extensionOverride ? '@' + extensionOverride : '';
+				return base + '/' + sig + '/' + options + '/plain/' + srcPath + extPart;
 			}
 
-			function renderURL() {
-				const url = buildURL();
-				urlOut.textContent = url;
+			function buildMainURL() {
+				const rs = 'rs:' + resizing.value + ':' + width.value + ':' + height.value + ':' + enlarge.value;
+				const gr = 'g:' + gravity.value;
+				const extValue = ext.value || '';
+				return buildImgproxyURL([rs, gr], extValue);
+			}
+
+			function setPreviewImage(imgEl, url) {
 				if (url.startsWith('http://') || url.startsWith('https://')) {
-					preview.src = url;
+					imgEl.src = url;
 				}
+			}
+
+			function renderAll() {
+				let mainURL = '';
+				try {
+					mainURL = buildMainURL();
+					urlOut.textContent = mainURL;
+					setPreviewImage(preview, mainURL);
+				} catch (err) {
+					urlOut.textContent = String(err && err.message ? err.message : err);
+				}
+
+				try {
+					const url = buildImgproxyURL([
+						'rs:' + resizeType2.value + ':' + resizeW2.value + ':' + resizeH2.value + ':1',
+						'g:' + gravity2.value,
+					], '');
+					resizeUrlOut.textContent = url;
+					setPreviewImage(resizePreview, url);
+				} catch (err) {
+					resizeUrlOut.textContent = String(err && err.message ? err.message : err);
+				}
+
+				try {
+					const url = buildImgproxyURL([
+						'rs:fit:800:600:1',
+						'g:ce',
+						'q:' + quality2.value,
+						'dpr:' + dpr2.value,
+					], formatExt2.value);
+					formatUrlOut.textContent = url;
+					setPreviewImage(formatPreview, url);
+				} catch (err) {
+					formatUrlOut.textContent = String(err && err.message ? err.message : err);
+				}
+
+				try {
+					const url = buildImgproxyURL([
+						'rs:fit:900:700:1',
+						'g:ce',
+						'rt:' + rotate3.value,
+						'bl:' + blur3.value,
+						'sh:' + sharpen3.value,
+					], '');
+					advancedUrlOut.textContent = url;
+					setPreviewImage(advancedPreview, url);
+				} catch (err) {
+					advancedUrlOut.textContent = String(err && err.message ? err.message : err);
+				}
+			}
+
+			function handleUpload(evt) {
+				evt.preventDefault();
+				if (!uploadFile.files || uploadFile.files.length === 0) {
+					uploadStatus.textContent = 'Select a file first.';
+					return;
+				}
+
+				const fd = new FormData();
+				fd.append('file', uploadFile.files[0]);
+				fd.append('author_key', 'imgproxy');
+				if (uploadFolder.value.trim()) {
+					fd.append('folder', uploadFolder.value.trim());
+				}
+				if (uploadName.value.trim()) {
+					fd.append('new_name', uploadName.value.trim());
+				}
+
+				uploadStatus.textContent = 'Uploading...';
+				fetch(uploadEndpoint.value.trim(), {
+					method: 'POST',
+					body: fd,
+				})
+					.then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+					.then(function(result) {
+						if (!result.ok) {
+							uploadStatus.textContent = 'Upload failed: ' + (result.body.error || 'unknown error');
+							return;
+						}
+						if (result.body.public_url) {
+							sourceMode.value = 'remote';
+							source.value = result.body.public_url;
+						}
+						uploadStatus.textContent = 'Uploaded to ' + (result.body.path || 'unknown path');
+						renderAll();
+					})
+					.catch(function(err) {
+						uploadStatus.textContent = 'Upload failed (possibly CORS/network): ' + String(err);
+					});
 			}
 
 			tabs.forEach(function(tab) {
 				tab.addEventListener('click', function() {
 					tabs.forEach(function(t) { t.classList.toggle('active', t === tab); });
 					panels.forEach(function(panel) { panel.classList.toggle('active', panel.id === tab.dataset.panel); });
+					renderAll();
 				});
 			});
 
-			[endpoint, signature, source, resizing, width, height, widthValue, heightValue, enlarge, gravity, ext].forEach(function(el) {
+			[
+				endpoint, signature, sourceMode, source, localPath, resizing, width, height, widthValue, heightValue, enlarge, gravity, ext,
+				resizeType2, resizeW2, resizeH2, resizeW2Val, resizeH2Val, gravity2,
+				formatExt2, quality2, quality2Val, dpr2,
+				rotate3, blur3, blur3Val, sharpen3, sharpen3Val,
+			].forEach(function(el) {
 				el.addEventListener('input', function() {
-					if (el === width || el === height) {
-						syncRangeValues();
-					}
-					if (el === widthValue || el === heightValue) {
-						syncSliderValues();
-					}
-					renderURL();
+					syncRangePair(width, widthValue, 5000);
+					syncRangePair(height, heightValue, 5000);
+					syncRangePair(resizeW2, resizeW2Val, 5000);
+					syncRangePair(resizeH2, resizeH2Val, 5000);
+					syncRangePair(quality2, quality2Val, 100);
+					syncRangePair(blur3, blur3Val, 100);
+					syncRangePair(sharpen3, sharpen3Val, 100);
+					renderAll();
 				});
 			});
 
@@ -450,8 +731,16 @@
 				}
 			});
 
-			syncRangeValues();
-			renderURL();
+			uploadForm.addEventListener('submit', handleUpload);
+
+			syncRangePair(width, widthValue, 5000);
+			syncRangePair(height, heightValue, 5000);
+			syncRangePair(resizeW2, resizeW2Val, 5000);
+			syncRangePair(resizeH2, resizeH2Val, 5000);
+			syncRangePair(quality2, quality2Val, 100);
+			syncRangePair(blur3, blur3Val, 100);
+			syncRangePair(sharpen3, sharpen3Val, 100);
+			renderAll();
 		</script>
 	</body>
 </html>
